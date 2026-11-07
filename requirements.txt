@@ -1,12 +1,6 @@
 # Dự án Ứng dụng Quản lý Phòng máy tính (12 vị trí - Tkinter & SQLite)
 # Yêu cầu môi trường: Python 3.10 trở lên
-# Ứng dụng chính sử dụng 100% thư viện chuẩn đi kèm Python:
+# Ứng dụng sử dụng 100% thư viện chuẩn đi kèm Python:
 # - tkinter (Giao diện người dùng đồ họa GUI)
 # - sqlite3 (Cơ sở dữ liệu quan hệ cục bộ)
 # - unittest (Bộ kiểm thử tự động)
-# - typing (Kiểu dữ liệu mở rộng)
-
-# Gói phụ trợ (tùy chọn - dùng khi biên soạn tài liệu Word & sơ đồ):
-python-docx>=1.1.0
-matplotlib>=3.8.0
-pillow>=10.0.0
