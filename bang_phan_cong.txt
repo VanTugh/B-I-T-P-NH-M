@@ -1,5 +1,5 @@
 ================================================================================
-BẢNG THỐNG KÊ ĐÓNG GÓP & PHÂN CÔNG NHIỆM VỤ NHÓM 4 (KIẾN TRÚC MVC)
+BẢNG THỐNG KÊ ĐÓNG GÓP & PHÂN CÔNG NHIỆM VỤ NHÓM 4 (KIẾN TRÚC MVC + TESTS)
 Dự án: Ứng dụng xếp chỗ và tra cứu sinh viên phòng máy
 Môn học: Lập trình Python nâng cao
 ================================================================================
@@ -16,14 +16,17 @@ B-I-T-P-NH-M/
 ├── controllers/
 │   ├── __init__.py
 │   └── phong_may_controller.py  # Tầng Controller: Xử lý sự kiện & Validate dữ liệu
+├── tests/
+│   ├── __init__.py
+│   └── test_phong_may.py        # Bộ kiểm thử tự động 5 kịch bản (TC1 -> TC5)
 ├── tao_du_lieu_demo.py          # Script khởi tạo CSDL & sinh 100 hồ sơ SV001-SV100
 ├── main.py                      # Điểm khởi chạy ứng dụng (ghép nối Model-View-Controller)
 ├── phong_may.db                 # Tệp cơ sở dữ liệu SQLite
 └── bang_phan_cong.txt           # Bảng thống kê đóng góp và phân công nhiệm vụ nhóm
 
-2. PHÂN CÔNG MODULE LẬP TRÌNH & KIỂM THỬ (TEST CASES)
+2. PHÂN CÔNG MODULE LẬP TRÌNH & KIỂM THỬ CHO 5 THÀNH VIÊN
 --------------------------------------------------------------------------------
-| Thành viên   | Module phụ trách (MVC)            | Kịch bản kiểm thử (Test Case) |
+| Thành viên   | Module phụ trách (MVC & Test)     | Kịch bản thuyết trình (TC)    |
 |--------------|-----------------------------------|-------------------------------|
 | Thành viên 1 | Tầng Model & Khởi tạo dữ liệu     | TC1: Khởi tạo dữ liệu         |
 |              | - tao_du_lieu_demo.py             | - Chạy script 2 lần liên tiếp |
@@ -42,9 +45,16 @@ B-I-T-P-NH-M/
 |              | - Hàm load_data_to_gui()          | - Xếp SV100 vào B1 (báo lỗi   |
 |              | - Hàm xep_cho() + 3 bước Validate |   SV đã có chỗ khác)          |
 |--------------|-----------------------------------|-------------------------------|
-| Thành viên 4 | Tầng Controller (Tra cứu, Trả chỗ)| TC4 & TC5: Lưu trữ & Trả chỗ  |
-| (Hoặc làm    | & Tích hợp hệ thống (main.py)     | - TC4: Đóng/mở lại app, giữ   |
-|  chung)      | - Hàm tra_cho() & tra_cuu()       |   nguyên A2 - SV100 và 1/12   |
-|              | - main.py                         | - TC5: Trả chỗ A2 -> 0/12,    |
-|              | - Đóng gói hồ sơ nộp bài          |   tra cứu SV100 báo chưa xếp  |
+| Thành viên 4 | Tầng Controller (Tra cứu, Trả chỗ)| TC4: Lưu trữ trạng thái       |
+|              | & Tích hợp hệ thống               | - Đóng hoàn toàn ứng dụng và  |
+|              | - Hàm tra_cho() & tra_cuu()       |   mở lại (main.py)            |
+|              | - main.py                         | - Giao diện nạp lại A2 - SV100|
+|              |                                   |   và giữ nguyên bộ đếm 1/12   |
+|--------------|-----------------------------------|-------------------------------|
+| Thành viên 5 | Kiểm thử tự động (Unit Testing)   | TC5: Trả chỗ & Cập nhật       |
+|              | & Đóng gói sản phẩm               | - Chọn A2, bấm [Trả chỗ] ->   |
+|              | - tests/test_phong_may.py         |   Bộ đếm giảm về 0/12         |
+|              | - Viết unittest cho TC1 -> TC5    | - Tra cứu lại SV100 báo       |
+|              | - bang_phan_cong.txt              |   "Chưa được xếp chỗ"         |
+|              |                                   | - Chạy toàn bộ test_phong_may |
 ================================================================================
