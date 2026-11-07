@@ -1,0 +1,41 @@
+================================================================================
+BẢNG THỐNG KÊ ĐÓNG GÓP & PHÂN CÔNG NHIỆM VỤ NHÓM 4
+Dự án: Ứng dụng xếp chỗ và tra cứu sinh viên phòng máy
+Môn học: Lập trình Python nâng cao
+================================================================================
+
+1. PHÂN CÔNG MODULE LẬP TRÌNH & KIỂM THỬ (TEST CASES)
+--------------------------------------------------------------------------------
+| Thành viên   | Module phụ trách                  | Kịch bản kiểm thử (Test Case) |
+|--------------|-----------------------------------|-------------------------------|
+| Thành viên 1 | Bước 1: Cơ sở dữ liệu & Dữ liệu   | TC1: Khởi tạo dữ liệu         |
+|              | - File: tao_du_lieu_demo.py       | - Chạy script 2 lần liên tiếp |
+|              | - Tạo bảng sinh_vien, xep_cho     | - Đảm bảo đủ 100 hồ sơ SV     |
+|              | - Sinh tự động SV001 -> SV100     | - Không trùng lặp, không lỗi  |
+|--------------|-----------------------------------|-------------------------------|
+| Thành viên 2 | Bước 2: Giao diện GUI (Tkinter)   | TC2: Xếp chỗ hợp lệ           |
+|              | - File: main.py (MainWindow UI)   | - Chọn ghế A2, nhập SV100     |
+|              | - Bố cục 2 Panel (60% - 40%)      | - Hiển thị "Sinh viên 100"    |
+|              | - Lưới 12 nút ghế (3x4: A1..C4)   | - Nút A2 -> "A2 - SV100"      |
+|              | - Khu vực điều khiển & Bộ đếm     | - Bộ đếm tăng lên 1/12        |
+|--------------|-----------------------------------|-------------------------------|
+| Thành viên 3 | Bước 3: Logic Xếp chỗ & Ràng buộc | TC3: Ràng buộc xếp chỗ        |
+|              | - Hàm load_data_to_gui()          | - Xếp SV001 vào A2 (báo lỗi   |
+|              | - Hàm xep_cho() + 3 bước Validate |   chỗ đã có người)            |
+|              | - Bắt lỗi sqlite3.IntegrityError  | - Xếp SV100 vào B1 (báo lỗi   |
+|              |   cho ràng buộc UNIQUE(ma_sv)     |   SV đã có chỗ khác)          |
+|--------------|-----------------------------------|-------------------------------|
+| Thành viên 4 | Bước 3 & 4: Tra cứu, Trả chỗ,     | TC4 & TC5: Lưu trữ & Trả chỗ  |
+| (Hoặc làm    | Tích hợp & Kiểm thử toàn hệ thống | - TC4: Đóng/mở lại app, giữ   |
+|  chung)      | - Hàm tra_cho() (DELETE xep_cho)  |   nguyên A2 - SV100 và 1/12   |
+|              | - Hàm tra_cuu() (LEFT JOIN)       | - TC5: Trả chỗ A2 -> 0/12,    |
+|              | - Đóng gói hồ sơ nộp bài          |   tra cứu SV100 báo chưa xếp  |
+--------------------------------------------------------------------------------
+
+2. DANH SÁCH TỆP NỘP BÀI
+--------------------------------------------------------------------------------
+1. tao_du_lieu_demo.py : Script khởi tạo CSDL SQLite và 100 hồ sơ sinh viên mẫu.
+2. main.py             : Mã nguồn chính của ứng dụng Desktop (Tkinter + SQLite).
+3. phong_may.db        : Tệp cơ sở dữ liệu SQLite.
+4. bang_phan_cong.txt  : Bảng thống kê đóng góp và phân công nhiệm vụ nhóm.
+================================================================================
