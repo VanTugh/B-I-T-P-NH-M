@@ -5,6 +5,7 @@ Kiểm tra:
 - Kiểm tra PRAGMA foreign_keys = ON.
 - Ràng buộc PRIMARY KEY, FOREIGN KEY, UNIQUE.
 - Hàm get_seat_map() và get_seat_stats().
+- Đảm bảo giải phóng tài nguyên connection và cursor sau mỗi ca kiểm thử.
 """
 
 import os
@@ -29,49 +30,63 @@ class TestDatabaseModule(unittest.TestCase):
 
     def test_foreign_keys_enabled(self):
         """Kiểm tra PRAGMA foreign_keys bắt buộc phải được kích hoạt."""
-        conn = get_connection(TEST_DB)
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA foreign_keys;")
-        fk_status = cursor.fetchone()[0]
-        conn.close()
+        with get_connection(TEST_DB) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("PRAGMA foreign_keys;")
+                fk_status = cursor.fetchone()[0]
+            finally:
+                cursor.close()
         self.assertEqual(fk_status, 1, "Tính năng khóa ngoại chưa được bật!")
 
     def test_insert_nonexistent_student_raises_fk_error(self):
         """Chèn bản ghi vào xep_cho với mã SV không tồn tại bắt buộc phải ném lỗi IntegrityError."""
-        conn = get_connection(TEST_DB)
         with self.assertRaises(sqlite3.IntegrityError):
-            conn.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV999');")
-            conn.commit()
-        conn.close()
+            with get_connection(TEST_DB) as conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV999');")
+                finally:
+                    cursor.close()
 
     def test_duplicate_student_in_xep_cho_raises_unique_error(self):
         """Ràng buộc UNIQUE: Một sinh viên không thể xếp 2 vị trí máy khác nhau."""
-        conn = get_connection(TEST_DB)
-        # Tạo sinh viên hợp lệ
-        conn.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV001', 'Sinh viên 001');")
-        # Xếp vào A1
-        conn.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV001');")
-        conn.commit()
+        with get_connection(TEST_DB) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV001', 'Sinh viên 001');")
+                cursor.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV001');")
+            finally:
+                cursor.close()
         
         # Thử xếp tiếp vào B1 -> Bắt buộc lỗi UNIQUE
         with self.assertRaises(sqlite3.IntegrityError):
-            conn.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('B1', 'SV001');")
-            conn.commit()
-        conn.close()
+            with get_connection(TEST_DB) as conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('B1', 'SV001');")
+                finally:
+                    cursor.close()
 
     def test_duplicate_seat_raises_pk_error(self):
         """Ràng buộc PRIMARY KEY: Một vị trí máy không thể có 2 sinh viên."""
-        conn = get_connection(TEST_DB)
-        conn.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV001', 'Sinh viên 001');")
-        conn.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV002', 'Sinh viên 002');")
-        conn.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV001');")
-        conn.commit()
+        with get_connection(TEST_DB) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV001', 'Sinh viên 001');")
+                cursor.execute("INSERT INTO sinh_vien (ma_sv, ho_ten) VALUES ('SV002', 'Sinh viên 002');")
+                cursor.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV001');")
+            finally:
+                cursor.close()
         
         # Thử xếp SV002 vào cùng vị trí A1 -> Bắt buộc lỗi PRIMARY KEY
         with self.assertRaises(sqlite3.IntegrityError):
-            conn.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV002');")
-            conn.commit()
-        conn.close()
+            with get_connection(TEST_DB) as conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("INSERT INTO xep_cho (ma_cho, ma_sv) VALUES ('A1', 'SV002');")
+                finally:
+                    cursor.close()
 
     def test_get_seat_map_structure(self):
         """Kiểm tra get_seat_map() trả về đủ 12 vị trí máy từ A1 đến C4."""

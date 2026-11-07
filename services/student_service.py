@@ -4,6 +4,7 @@ Dự án: Quản lý phòng máy tính 12 vị trí (3 hàng x 4 cột).
 Trách nhiệm:
 - Tra cứu sinh viên theo mã sinh viên (sử dụng LEFT JOIN để phân biệt rõ 3 trạng thái).
 - Cung cấp hàm thống kê số vị trí tổng, đã dùng, còn trống và tỷ lệ sử dụng.
+- Quản lý vòng đời connection và cursor chặt chẽ, đóng tài nguyên trong khối finally.
 """
 
 from typing import Optional, Dict, Any
@@ -37,25 +38,27 @@ def find_student(ma_sv: str, db_name: str = DB_NAME) -> Optional[Dict[str, Any]]
         
     with get_connection(db_name) as conn:
         cursor = conn.cursor()
-        
-        # Mệnh đề LEFT JOIN kết hợp bảng sinh_vien và xep_cho
-        query = """
-            SELECT sv.ma_sv, sv.ho_ten, xc.ma_cho
-            FROM sinh_vien sv
-            LEFT JOIN xep_cho xc ON sv.ma_sv = xc.ma_sv
-            WHERE sv.ma_sv = ?;
-        """
-        cursor.execute(query, (ma_sv,))
-        row = cursor.fetchone()
-        
-        if not row:
-            return None  # Trường hợp 1: Không tồn tại
+        try:
+            # Mệnh đề LEFT JOIN kết hợp bảng sinh_vien và xep_cho
+            query = """
+                SELECT sv.ma_sv, sv.ho_ten, xc.ma_cho
+                FROM sinh_vien sv
+                LEFT JOIN xep_cho xc ON sv.ma_sv = xc.ma_sv
+                WHERE sv.ma_sv = ?;
+            """
+            cursor.execute(query, (ma_sv,))
+            row = cursor.fetchone()
             
-        return {
-            "ma_sv": row["ma_sv"],
-            "ho_ten": row["ho_ten"],
-            "ma_cho": row["ma_cho"]  # None nếu chưa xếp, chuỗi 'A2' nếu đã xếp
-        }
+            if not row:
+                return None  # Trường hợp 1: Không tồn tại
+                
+            return {
+                "ma_sv": row["ma_sv"],
+                "ho_ten": row["ho_ten"],
+                "ma_cho": row["ma_cho"]  # None nếu chưa xếp, chuỗi 'A2' nếu đã xếp
+            }
+        finally:
+            cursor.close()
 
 
 def get_room_statistics(db_name: str = DB_NAME) -> Dict[str, Any]:

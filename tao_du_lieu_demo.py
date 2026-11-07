@@ -5,10 +5,12 @@ Trách nhiệm:
 - Sinh tối thiểu 100 hồ sơ sinh viên từ SV001 đến SV100.
 - Đảm bảo tính an toàn (idempotency): Chạy nhiều lần không làm nhân đôi dữ liệu.
 - Không làm mất hoặc xáo trộn các lượt xếp chỗ đang có trong bảng xep_cho.
+- Quản lý vòng đời connection và cursor chặt chẽ, đóng tài nguyên trong finally.
 - Chạy độc lập được bằng lệnh: python tao_du_lieu_demo.py.
 """
 
 import sys
+
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -36,22 +38,22 @@ def seed_students(n: int = 100, db_name: str = DB_NAME) -> int:
     
     with get_connection(db_name) as conn:
         cursor = conn.cursor()
-        
-        # Sử dụng vòng lặp sinh n sinh viên
-        for i in range(1, n + 1):
-            ma_sv = f"SV{i:03d}"
-            ho_ten = f"Sinh viên {i:03d}"
-            cursor.execute(
-                "INSERT OR IGNORE INTO sinh_vien (ma_sv, ho_ten) VALUES (?, ?);",
-                (ma_sv, ho_ten)
-            )
+        try:
+            # Sử dụng vòng lặp sinh n sinh viên
+            for i in range(1, n + 1):
+                ma_sv = f"SV{i:03d}"
+                ho_ten = f"Sinh viên {i:03d}"
+                cursor.execute(
+                    "INSERT OR IGNORE INTO sinh_vien (ma_sv, ho_ten) VALUES (?, ?);",
+                    (ma_sv, ho_ten)
+                )
+                
+            # Đếm tổng số sinh viên thực tế trong cơ sở dữ liệu
+            cursor.execute("SELECT COUNT(*) FROM sinh_vien;")
+            total_students = cursor.fetchone()[0]
+        finally:
+            cursor.close()
             
-        conn.commit()
-        
-        # Đếm tổng số sinh viên thực tế trong cơ sở dữ liệu
-        cursor.execute("SELECT COUNT(*) FROM sinh_vien;")
-        total_students = cursor.fetchone()[0]
-        
     return total_students
 
 

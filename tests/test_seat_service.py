@@ -3,6 +3,7 @@
 Kiểm tra:
 - assign_seat(): Hợp lệ, Vị trí sai, Mã SV rỗng, SV không tồn tại, Chỗ đã có người, SV đã ngồi chỗ khác.
 - release_seat(): Trả chỗ có người, Trả chỗ trống, Vị trí sai, Bảo toàn hồ sơ sinh_vien.
+- Đảm bảo giải phóng toàn bộ kết nối và con trỏ.
 """
 
 import os
@@ -34,12 +35,14 @@ class TestSeatService(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn("thành công", msg.lower())
         
-        # Kiểm tra CSDL thực tế
-        conn = get_connection(TEST_DB)
-        cursor = conn.cursor()
-        cursor.execute("SELECT ma_sv FROM xep_cho WHERE ma_cho = 'A2';")
-        row = cursor.fetchone()
-        conn.close()
+        # Kiểm tra CSDL thực tế với resource cleanup đầy đủ
+        with get_connection(TEST_DB) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT ma_sv FROM xep_cho WHERE ma_cho = 'A2';")
+                row = cursor.fetchone()
+            finally:
+                cursor.close()
         self.assertIsNotNone(row)
         self.assertEqual(row["ma_sv"], "SV100")
 
@@ -83,16 +86,17 @@ class TestSeatService(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn("thành công", msg.lower())
         
-        # Kiểm tra bảng xep_cho đã xóa
-        conn = get_connection(TEST_DB)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM xep_cho WHERE ma_cho = 'A2';")
-        self.assertIsNone(cursor.fetchone())
-        
-        # QUAN TRỌNG: Kiểm tra hồ sơ sinh_vien vẫn còn nguyên
-        cursor.execute("SELECT * FROM sinh_vien WHERE ma_sv = 'SV100';")
-        self.assertIsNotNone(cursor.fetchone(), "LỖI NGHIÊM TRỌNG: Trả chỗ làm mất hồ sơ sinh viên!")
-        conn.close()
+        # Kiểm tra bảng xep_cho đã xóa và hồ sơ sinh_vien vẫn còn nguyên
+        with get_connection(TEST_DB) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT * FROM xep_cho WHERE ma_cho = 'A2';")
+                self.assertIsNone(cursor.fetchone())
+                
+                cursor.execute("SELECT * FROM sinh_vien WHERE ma_sv = 'SV100';")
+                self.assertIsNotNone(cursor.fetchone(), "LỖI NGHIÊM TRỌNG: Trả chỗ làm mất hồ sơ sinh viên!")
+            finally:
+                cursor.close()
 
     def test_release_empty_seat_rejected(self):
         """Không cho phép trả vị trí đang trống."""
