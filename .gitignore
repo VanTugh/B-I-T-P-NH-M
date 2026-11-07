@@ -1,0 +1,30 @@
+# Python byte code
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary test databases (CSDL tạm sinh trong quá trình chạy test)
+test_*.db
+*_test.db
+
+# Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs & temp files
+*.log
+*.tmp
